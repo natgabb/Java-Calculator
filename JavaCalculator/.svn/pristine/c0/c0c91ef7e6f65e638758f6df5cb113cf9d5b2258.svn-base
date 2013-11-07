@@ -1,0 +1,218 @@
+package calculator;
+
+import interfaces.QueueInterface;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
+
+import utilities.CalculatorUtility;
+
+import arrays.DynamicArray;
+
+import exceptions.DAIllegalArgumentException;
+import exceptions.DAIndexOutOfBoundsException;
+import exceptions.DANullPointerException;
+import exceptions.DANumberFormatException;
+
+public class CalculatorModel extends Observable {
+
+	private ArrayList<String> allValues = null;
+	private String currentValue = "0";
+	private boolean hasAPeriod = false;
+	private boolean hasPressedNumber = false;
+	private boolean hasPressedEquals = false;
+	private int numberOfOpeningP = 0;
+	private int numberOfClosingP = 0;
+
+	/**
+	 * Constructor
+	 */
+	public CalculatorModel() {
+		allValues = new ArrayList<String>();
+	}
+
+	/**
+	 * Receives a key press.
+	 * 
+	 * @param key
+	 */
+	public void updateValues(String key) {
+		if (key == null)
+			throw new IllegalArgumentException("The key cannot be null.");
+		else if (isNumber(key)) {
+			if (!hasPressedNumber && allValues.size() > 0
+					&& allValues.get(allValues.size() - 1).equals(")"))
+				allValues.add("*");
+			if (hasPressedNumber)
+				currentValue += key;
+			else
+				currentValue = key;
+			hasPressedNumber = true;
+		} else if (isOperator(key)) {
+			if (hasPressedNumber || hasPressedEquals)
+				addCurrentValueToAllValues();
+			if (allValues.size() > 0) {
+				if (isOperator(allValues.get(allValues.size() - 1)))
+					allValues.remove(allValues.size() - 1);
+				allValues.add(key);
+			}
+		} else if (key.equals("(")) {
+			if (hasPressedNumber) {
+				addCurrentValueToAllValues();
+				allValues.add("*");
+			} else if (allValues.size() > 0) {
+				String previous = allValues.get(allValues.size() - 1);
+				if (previous.equals(")"))
+					allValues.add("*");
+			}
+			allValues.add(key);
+			numberOfOpeningP++;
+
+		} else if (key.equals(")")) {
+			if (numberOfOpeningP > numberOfClosingP) {
+				addCurrentValueToAllValues();
+				allValues.add(key);
+				numberOfClosingP++;
+			}
+		} else if (key.equals("+/-")) {
+			if (hasAPeriod)
+				currentValue = "" + (Double.parseDouble(currentValue) * -1);
+			else
+				currentValue = "" + (Integer.parseInt(currentValue) * -1);
+		} else if (key.equals(".")) {
+			if (!hasAPeriod) {
+				currentValue += ".";
+				hasAPeriod = true;
+			}
+		} else if (key.equals("=")) {
+			// This calculates the current values.
+			// Should be using Parser!?
+			addCurrentValueToAllValues();
+			QueueInterface<String> infix = new DynamicArray<String>();
+			for (String s : allValues)
+				try {
+					infix.add(s);
+				} catch (DAIndexOutOfBoundsException e) {
+					errorHasOccured();
+				}
+			try {
+				String result = CalculatorUtility
+						.evaluatePostfix(CalculatorUtility
+								.infixToPostfix(infix));
+				allValues.clear();
+				currentValue = result;
+				numberOfOpeningP = 0;
+				numberOfClosingP = 0;
+				hasPressedEquals = true;
+				hasAPeriod = true;
+			} catch (DANumberFormatException | DAIllegalArgumentException
+					| DAIndexOutOfBoundsException | DANullPointerException e) {
+				errorHasOccured();
+			}
+
+		} else if (key.equals("CE")) {
+			// Clear the current value.
+			currentValue = "0";
+			hasAPeriod = false;
+
+		} else if (key.equals("C")) {
+			// Clears all the values.
+			currentValue = "0";
+			allValues = new ArrayList<String>();
+			hasAPeriod = false;
+			hasPressedNumber = false;
+			numberOfClosingP = 0;
+			numberOfOpeningP = 0;
+			hasPressedEquals = false;
+		} else {
+			// An invalid key was received.
+			throw new IllegalArgumentException("The key is invalid: " + key);
+		}
+		// Notifies it's observers that it has changed.
+		setChanged();
+		notifyObservers();
+	}
+
+	/**
+	 * Returns the ArrayList containing all the currently stored values.
+	 * 
+	 * @return The ArrayList
+	 */
+	@SuppressWarnings("unchecked")
+	public ArrayList<String> getAllValues() {
+		return (ArrayList<String>) allValues.clone();
+	}
+
+	/**
+	 * Returns the current value String.
+	 * 
+	 * @return The current value
+	 */
+	public String getCurrentValue() {
+		return currentValue;
+	}
+
+	// /**
+	// * Clears all values from the list.
+	// */
+	// public void clearAllValues() {
+	// allValues.clear();
+	// }
+
+	private void errorHasOccured() {
+		allValues.clear();
+		currentValue = "NaN";
+	}
+
+	private void addCurrentValueToAllValues() {
+		allValues.add(currentValue);
+		currentValue = "0";
+		hasAPeriod = false;
+		hasPressedNumber = false;
+	}
+
+	/*
+	 * Checks if a key is an operator.
+	 * 
+	 * @param key The key
+	 * 
+	 * @return Whether it is an operator or not
+	 */
+	private boolean isOperator(String key) {
+		switch (key) {
+		case "+":
+		case "-":
+		case "/":
+		case "*":
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/*
+	 * Checks if a key is a number.
+	 * 
+	 * @param key The key
+	 * 
+	 * @return Whether it is a number or not
+	 */
+	private boolean isNumber(String key) {
+		switch (key) {
+		case "0":
+		case "1":
+		case "2":
+		case "3":
+		case "4":
+		case "5":
+		case "6":
+		case "7":
+		case "8":
+		case "9":
+			return true;
+		default:
+			return false;
+		}
+	}
+}

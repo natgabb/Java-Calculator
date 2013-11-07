@@ -1,0 +1,84 @@
+package calculator;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+
+public class CalculatorApp extends JFrame {
+
+	private static final long serialVersionUID = -6691919724077994317L;
+
+	// Panels
+	CalculatorButtonPanel buttonPanel = null;
+	CalculatorDisplayPanel displayPanel = null;
+	CalculatorModel model = null;
+
+	/**
+	 * Constructor
+	 */
+	public CalculatorApp() {
+		super();
+
+		try {
+			UIManager
+					.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null,
+					"The look and feel you selected is not supported.",
+					"Look and Feel Error", JOptionPane.INFORMATION_MESSAGE);
+		}
+
+		model = new CalculatorModel();
+		buttonPanel = new CalculatorButtonPanel(model);
+		displayPanel = new CalculatorDisplayPanel(model);
+
+		initialize();
+		setTitle("Calculator");
+		pack();
+		this.setVisible(true);
+		buttonPanel.setFocusToButton();
+	}
+
+	private void initialize() {
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		setLayout(gridBagLayout);
+
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.weightx = 0.2;
+		constraints.weighty = 0.2;
+		constraints.fill = GridBagConstraints.BOTH;
+		add(displayPanel, constraints);
+
+		constraints.gridx = 0;
+		constraints.gridy = 1;
+		constraints.weightx = 0.8;
+		constraints.weighty = 0.8;
+		constraints.fill = GridBagConstraints.BOTH;
+		add(buttonPanel, constraints);
+
+	}
+
+	/**
+	 * Starts the app.
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				CalculatorApp app = new CalculatorApp();
+				app.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			}
+
+		});
+	}
+
+}

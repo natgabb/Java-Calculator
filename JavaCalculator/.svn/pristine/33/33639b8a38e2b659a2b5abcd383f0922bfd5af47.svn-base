@@ -1,0 +1,12 @@
+package calculator;
+
+import java.util.Observable;
+
+public class CalculatorModel extends Observable{
+
+	@Override
+	public void notifyObservers()
+	{
+		
+	}
+}

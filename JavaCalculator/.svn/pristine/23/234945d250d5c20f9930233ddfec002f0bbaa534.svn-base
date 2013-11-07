@@ -1,0 +1,21 @@
+package calculator;
+
+import java.util.Observable;
+
+public class CalculatorModel extends Observable {
+
+	/**
+	 * Constructor
+	 */
+	public CalculatorModel() {
+
+	}
+
+	/**
+	 * Notifies the observers when it receives data.
+	 */
+	@Override
+	public void notifyObservers() {
+
+	}
+}

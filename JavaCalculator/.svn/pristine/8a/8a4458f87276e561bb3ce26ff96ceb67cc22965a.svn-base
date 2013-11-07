@@ -1,0 +1,71 @@
+package calculator;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+public class CalculatorDisplayPanel extends JPanel implements Observer {
+
+	private static final long serialVersionUID = -1048744463855396416L;
+	private static final int FONT_SIZE = 24;
+	private int currentFontSize = FONT_SIZE;
+	private Font font;
+
+	private JTextField currentValue = null;
+	private CalculatorModel model = null;
+
+	public CalculatorDisplayPanel(CalculatorModel model) {
+		super();
+		setLayout(new BorderLayout());
+		font = new Font(Font.DIALOG, Font.PLAIN, 18);
+		this.model = model;
+
+		initialize();
+	}
+
+	/*
+	 * Adds the text fields to the layout and configures them.
+	 */
+	private void initialize() {
+
+		currentValue = new JTextField();
+		currentValue.setHorizontalAlignment(JTextField.RIGHT);
+		currentValue.setFont(font);
+		currentValue.setEditable(false);
+		currentValue.setBackground(Color.WHITE);
+		currentValue.setPreferredSize(new Dimension(0, 70));
+		currentValue.setText("0");
+
+		add(currentValue, BorderLayout.CENTER);
+	}
+
+	/**
+	 * This is called when the Model changes.
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+
+		System.out.println("currentValue: " + model.getCurrentValue());
+		System.out.println("allValues: " + model.getAllValues());
+		currentValue.setText(model.getCurrentValue());
+	}
+
+	/**
+	 * This changes the font size depending on a percentage.
+	 * 
+	 * @param percentage
+	 *            the percentage
+	 */
+	public void setDisplayFontSize(double percentage) {
+		currentFontSize = (int) (FONT_SIZE * percentage);
+		font = font.deriveFont(Font.PLAIN, currentFontSize);
+		currentValue.setFont(font);
+	}
+
+}

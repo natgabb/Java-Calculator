@@ -1,0 +1,24 @@
+package calculator;
+
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.JPanel;
+
+public class CalculatorDisplayPanel extends JPanel implements Observer {
+
+	private static final long serialVersionUID = -1048744463855396416L;
+
+	private CalculatorModel model = null;
+	
+	public CalculatorDisplayPanel(CalculatorModel model)
+	{
+		this.model = model;
+	}
+	
+	@Override
+	public void update(Observable o, Object arg) {
+		
+	}
+
+}
